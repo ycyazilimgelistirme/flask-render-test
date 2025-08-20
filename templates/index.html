@@ -1,73 +1,64 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Render Flask Test</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Yc Music — Prototip</title>
   <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1e1e2f, #2a2a40);
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+    :root {
+      --bg:#0f1115; --panel:#161a22; --muted:#8b94a7; --text:#e8ecf3; --accent:#4ade80; --accent2:#60a5fa; --danger:#ef4444;
+      --radius:16px;
     }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0b0d12,#121826 40%,#0f1115);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Noto Sans",sans-serif}
+    .app{display:grid;grid-template-columns:280px 1fr;grid-template-rows:80px 1fr 100px;grid-template-areas:"sidebar header" "sidebar main" "player player";height:100%}
+    .sidebar{grid-area:sidebar;background:rgba(22,26,34,.85);backdrop-filter:saturate(1.2) blur(6px);border-right:1px solid #1f2532;padding:20px}
+    .header{grid-area:header;display:flex;gap:12px;align-items:center;padding:16px 20px;border-bottom:1px solid #1f2532;background:rgba(22,26,34,.5);backdrop-filter:blur(6px)}
+    .main{grid-area:main;overflow:auto;padding:20px}
+    .player{grid-area:player;border-top:1px solid #1f2532;background:rgba(22,26,34,.9);backdrop-filter:blur(6px);display:flex;align-items:center;gap:18px;padding:12px 20px}
 
-    .card {
-      background: #2e2e3e;
-      border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      padding: 30px;
-      text-align: center;
-      width: 90%;
-      max-width: 500px;
-      animation: fadeIn 1s ease-in-out;
-    }
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
+    .logo-dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(45deg,var(--accent),var(--accent2))}
+    .nav a{display:block;padding:10px 12px;border-radius:10px;color:var(--muted);text-decoration:none;margin-bottom:6px}
+    .nav a:hover{background:#1b2130;color:var(--text)}
+    .search{flex:1;display:flex;gap:10px}
+    .search input{flex:1;padding:12px 14px;border-radius:12px;border:1px solid #263045;background:#0f1320;color:var(--text);outline:none}
+    .search button{padding:12px 16px;border-radius:12px;border:1px solid #263045;background:linear-gradient(135deg,var(--accent),#22c55e);color:#0b0d12;font-weight:700;cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+    .card{background:linear-gradient(180deg,#182030,#141a28);border:1px solid #20283a;border-radius:var(--radius);overflow:hidden;transition:transform .15s ease,box-shadow .15s ease;cursor:pointer}
+    .card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .cover{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
+    .meta{padding:12px}
+    .title{font-weight:700;line-height:1.2;margin:0 0 6px}
+    .sub{color:var(--muted);font-size:13px;display:flex;gap:8px;flex-wrap:wrap}
+    .pill{font-size:11px;border:1px solid #2a3550;background:#121828;padding:2px 8px;border-radius:999px}
+    .duration{margin-left:auto}
 
-    .card h1 {
-      margin: 0 0 15px;
-      font-size: 2rem;
-      color: #4ade80; /* yeşil */
-    }
+    .nowplaying{display:flex;align-items:center;gap:14px;min-width:0}
+    .np-cover{width:64px;height:64px;border-radius:10px;object-fit:cover;border:1px solid #263045}
+    .np-text{min-width:0}
+    .np-title{margin:0;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .np-sub{margin:2px 0 0;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .btn{border:1px solid #2a3550;background:#121828;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .btn:hover{background:#1a2234}
+    .queue{display:flex;gap:8px;align-items:center;margin-left:auto}
+    .big-hero{position:sticky;top:0;margin-bottom:18px;border-radius:18px;overflow:hidden;border:1px solid #263045;background:#0d1220}
+    .big-hero img{width:100%;max-height:48vh;object-fit:cover;display:block}
 
-    .card p {
-      font-size: 1.1rem;
-      margin-bottom: 20px;
-      color: #ddd;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 12px 20px;
-      margin: 10px 5px;
-      border-radius: 8px;
-      background: #4ade80;
-      color: #000;
-      font-weight: bold;
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
-
-    .btn:hover {
-      background: #22c55e;
-      transform: translateY(-3px);
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    @media (max-width: 900px){
+      .app{grid-template-columns:1fr;grid-template-rows:80px 1fr 100px;grid-template-areas:"header" "main" "player"}
+      .sidebar{display:none}
+      .big-hero img{max-height:36vh}
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>✅ Render Test Başarılı</h1>
-    <p>Bu sayfa Flask üzerinden Render'da yayınlanıyor.</p>
-    <a href="/merhaba" class="btn">Merhaba Sayfası</a>
-    <a href="https://render.com/" target="_blank" class="btn">Render.com</a>
-  </div>
-</body>
-</html>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo"><span class="logo-dot"></span> Yc Music</div>
+      <div class="nav" style="margin-top:16px">
+        <a href="#">Keşfet</a>
+        <a href="#">Çalma Listelerim</a>
+        <a href="#">Favoriler</a>
+      </div>
