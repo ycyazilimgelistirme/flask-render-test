@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, redirect
 from ytmusicapi import YTMusic
-import yt_dlp
 from cachetools import TTLCache
+import yt_dlp
 
 app = Flask(__name__, template_folder="templates")
 ytm = YTMusic()
@@ -24,7 +24,7 @@ def home():
 def api_search():
     q = request.args.get("q","").strip()
     if not q:
-        return jsonify({"results":[]})
+        return {"results":[]}
     raw = ytm.search(q, limit=20)
     results=[]
     for item in raw:
@@ -46,24 +46,27 @@ def api_search():
             "cover": cover,
             "explicit": is_explicit
         })
-    return jsonify({"results": results})
+    return {"results": results}
 
 @app.route("/stream/<video_id>")
 def stream(video_id):
-    if video_id in stream_cache:
-        return jsonify({"url": stream_cache[video_id]})
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'quiet': True,
-        'no_warnings': True,
-        'simulate': True,
-        'forceurl': True
-    }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
-        url = info['url']
-        stream_cache[video_id] = url
-        return jsonify({"url": url})
+    try:
+        if video_id in stream_cache:
+            return redirect(stream_cache[video_id])
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'quiet': True,
+            'no_warnings': True,
+            'simulate': True,
+            'forceurl': True
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
+            url = info['url']
+            stream_cache[video_id] = url
+            return redirect(url)
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
