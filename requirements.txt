@@ -1,1 +1,4 @@
 flask
+ytmusicapi
+yt-dlp
+cachetools
