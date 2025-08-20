@@ -82,11 +82,9 @@ function setNowPlaying(item){
   npCover.src=item.cover||"";
   heroImg.src=item.cover||"";
   hero.style.display=item.cover?"block":"none";
-  fetch(`/stream/${item.videoId}`).then(r=>r.json()).then(data=>{
-    player.src=data.url;
-    player.play();
-    playBtn.textContent="⏸︎";
-  }).catch(e=>console.error(e));
+  player.src = `/stream/${item.videoId}`; // Direkt ham link çalacak
+  player.play().catch(e=>console.error(e));
+  playBtn.textContent="⏸︎";
 }
 
 function pushToFront(item){
