@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, jsonify, redirect
+from flask import Flask, render_template, request, jsonify
 from ytmusicapi import YTMusic
-from cachetools import TTLCache
 import yt_dlp
+from cachetools import TTLCache
 
 app = Flask(__name__, template_folder="templates")
 ytm = YTMusic()
@@ -50,9 +50,8 @@ def api_search():
 
 @app.route("/stream/<video_id>")
 def stream(video_id):
-    # Eğer cache’de varsa kullan
     if video_id in stream_cache:
-        return redirect(stream_cache[video_id])
+        return jsonify({"url": stream_cache[video_id]})
     ydl_opts = {
         'format': 'bestaudio/best',
         'quiet': True,
@@ -64,7 +63,7 @@ def stream(video_id):
         info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
         url = info['url']
         stream_cache[video_id] = url
-        return redirect(url)
+        return jsonify({"url": url})
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
