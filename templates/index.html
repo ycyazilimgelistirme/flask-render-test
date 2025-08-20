@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yc Music</title>
+<title>Yc Music Proxy</title>
 <style>
 :root {--bg:#0f1115;--panel:#161a22;--muted:#8b94a7;--text:#e8ecf3;--accent:#4ade80;--accent2:#60a5fa;--radius:16px}
 body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh}
@@ -82,7 +82,7 @@ function setNowPlaying(item){
   npCover.src=item.cover||"";
   heroImg.src=item.cover||"";
   hero.style.display=item.cover?"block":"none";
-  player.src = `/stream/${item.videoId}`; // Direkt ham link çalacak
+  player.src = `/proxy/${item.videoId}`;
   player.play().catch(e=>console.error(e));
   playBtn.textContent="⏸︎";
 }
