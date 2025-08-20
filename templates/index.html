@@ -62,3 +62,178 @@
         <a href="#">Çalma Listelerim</a>
         <a href="#">Favoriler</a>
       </div>
+    </aside>
+
+    <header class="header">
+      <form class="search" id="searchForm">
+        <input id="query" placeholder="Şarkı, sanatçı veya albüm ara…" />
+        <button type="submit">Ara</button>
+      </form>
+    </header>
+
+    <main class="main">
+      <div class="big-hero" id="hero" style="display:none">
+        <img id="heroImg" alt="Kapak" />
+      </div>
+      <div class="grid" id="results"></div>
+    </main>
+
+    <footer class="player">
+      <div class="nowplaying">
+        <img class="np-cover" id="npCover" alt="">
+        <div class="np-text">
+          <h4 class="np-title" id="npTitle">Hazır</h4>
+          <div class="np-sub" id="npSub">Bir şarkı seç</div>
+        </div>
+      </div>
+      <div class="queue">
+        <button class="btn" id="prevBtn">⏮︎</button>
+        <button class="btn" id="playBtn">▶️</button>
+        <button class="btn" id="nextBtn">⏭︎</button>
+        <span class="pill" id="queueInfo">Kuyruk: 0</span>
+      </div>
+      <audio id="player" preload="none"></audio>
+    </footer>
+  </div>
+
+  <script>
+    const resultsEl = document.getElementById("results");
+    const form = document.getElementById("searchForm");
+    const qInput = document.getElementById("query");
+    const player = document.getElementById("player");
+    const playBtn = document.getElementById("playBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const npTitle = document.getElementById("npTitle");
+    const npSub = document.getElementById("npSub");
+    const npCover = document.getElementById("npCover");
+    const queueInfo = document.getElementById("queueInfo");
+    const hero = document.getElementById("hero");
+    const heroImg = document.getElementById("heroImg");
+
+    let searchResults = [];
+    let queue = [];
+    let historyStack = [];
+    let current = null;
+
+    function updateQueueInfo(){
+      queueInfo.textContent = `Kuyruk: ${queue.length}`;
+    }
+
+    function setNowPlaying(item){
+      current = item;
+      npTitle.textContent = item.title || "Bilinmiyor";
+      npSub.textContent = [item.artists, item.album].filter(Boolean).join(" • ") || "";
+      npCover.src = item.cover || "";
+      heroImg.src = item.cover || "";
+      hero.style.display = item.cover ? "block" : "none";
+      player.src = `/stream/${item.videoId}`;
+      player.play().catch(()=>{});
+      playBtn.textContent = "⏸︎";
+    }
+
+    function pushToFront(item){
+      // Aynı videoId varsa kuyruğun içinden çıkar
+      queue = queue.filter(x => x.videoId !== item.videoId);
+      // en öne ekle
+      queue.unshift(item);
+      updateQueueInfo();
+    }
+
+    function renderResults(){
+      resultsEl.innerHTML = "";
+      for(const r of searchResults){
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <img class="cover" src="${r.cover || ""}" alt="">
+          <div class="meta">
+            <div class="title">${escapeHtml(r.title || "")}</div>
+            <div class="sub">
+              <span>${escapeHtml(r.artists || "Bilinmiyor")}</span>
+              ${r.album ? `<span class="pill">${escapeHtml(r.album)}</span>` : ""}
+              ${r.duration ? `<span class="duration pill">${escapeHtml(r.duration)}</span>` : ""}
+              ${r.explicit ? `<span class="pill">E</span>` : ""}
+            </div>
+          </div>
+        `;
+        card.addEventListener("click", () => {
+          pushToFront(r);            // tıklanan şarkıya öncelik
+          playNext(true);            // hemen çal
+        });
+        resultsEl.appendChild(card);
+      }
+    }
+
+    function playNext(forceFromFront=false){
+      if(forceFromFront && queue.length){
+        const next = queue.shift();
+        if(current) historyStack.push(current);
+        setNowPlaying(next);
+        updateQueueInfo();
+        return;
+      }
+      if(queue.length){
+        const next = queue.shift();
+        if(current) historyStack.push(current);
+        setNowPlaying(next);
+        updateQueueInfo();
+      }
+    }
+
+    function playPrev(){
+      const prev = historyStack.pop();
+      if(prev){
+        if(current) queue.unshift(current);
+        setNowPlaying(prev);
+        updateQueueInfo();
+      }
+    }
+
+    form.addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const q = qInput.value.trim();
+      if(!q) return;
+      resultsEl.innerHTML = "Aranıyor…";
+      try{
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        searchResults = data.results || [];
+        // yeni arama: kuyruk arama sonuçlarıyla dolar (tıklananlar yine öne alınacak)
+        queue = [...searchResults];
+        historyStack = [];
+        current = null;
+        updateQueueInfo();
+        renderResults();
+      }catch(err){
+        resultsEl.innerHTML = "Hata oluştu.";
+        console.error(err);
+      }
+    });
+
+    playBtn.addEventListener("click", ()=>{
+      if(!current){
+        // hiç çalmıyorsa kuyruktan başla
+        playNext(true);
+        return;
+      }
+      if(player.paused){
+        player.play().catch(()=>{});
+        playBtn.textContent = "⏸︎";
+      }else{
+        player.pause();
+        playBtn.textContent = "▶️";
+      }
+    });
+
+    nextBtn.addEventListener("click", ()=> playNext(true));
+    prevBtn.addEventListener("click", ()=> playPrev());
+
+    player.addEventListener("ended", ()=> playNext(false));
+
+    function escapeHtml(s){
+      return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+    }
+  </script>
+</body>
+</html>
