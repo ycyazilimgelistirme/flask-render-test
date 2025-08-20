@@ -1,239 +1,141 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Yc Music — Prototip</title>
-  <style>
-    :root {
-      --bg:#0f1115; --panel:#161a22; --muted:#8b94a7; --text:#e8ecf3; --accent:#4ade80; --accent2:#60a5fa; --danger:#ef4444;
-      --radius:16px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,#0b0d12,#121826 40%,#0f1115);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Noto Sans",sans-serif}
-    .app{display:grid;grid-template-columns:280px 1fr;grid-template-rows:80px 1fr 100px;grid-template-areas:"sidebar header" "sidebar main" "player player";height:100%}
-    .sidebar{grid-area:sidebar;background:rgba(22,26,34,.85);backdrop-filter:saturate(1.2) blur(6px);border-right:1px solid #1f2532;padding:20px}
-    .header{grid-area:header;display:flex;gap:12px;align-items:center;padding:16px 20px;border-bottom:1px solid #1f2532;background:rgba(22,26,34,.5);backdrop-filter:blur(6px)}
-    .main{grid-area:main;overflow:auto;padding:20px}
-    .player{grid-area:player;border-top:1px solid #1f2532;background:rgba(22,26,34,.9);backdrop-filter:blur(6px);display:flex;align-items:center;gap:18px;padding:12px 20px}
-
-    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
-    .logo-dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(45deg,var(--accent),var(--accent2))}
-    .nav a{display:block;padding:10px 12px;border-radius:10px;color:var(--muted);text-decoration:none;margin-bottom:6px}
-    .nav a:hover{background:#1b2130;color:var(--text)}
-    .search{flex:1;display:flex;gap:10px}
-    .search input{flex:1;padding:12px 14px;border-radius:12px;border:1px solid #263045;background:#0f1320;color:var(--text);outline:none}
-    .search button{padding:12px 16px;border-radius:12px;border:1px solid #263045;background:linear-gradient(135deg,var(--accent),#22c55e);color:#0b0d12;font-weight:700;cursor:pointer}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
-    .card{background:linear-gradient(180deg,#182030,#141a28);border:1px solid #20283a;border-radius:var(--radius);overflow:hidden;transition:transform .15s ease,box-shadow .15s ease;cursor:pointer}
-    .card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
-    .cover{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
-    .meta{padding:12px}
-    .title{font-weight:700;line-height:1.2;margin:0 0 6px}
-    .sub{color:var(--muted);font-size:13px;display:flex;gap:8px;flex-wrap:wrap}
-    .pill{font-size:11px;border:1px solid #2a3550;background:#121828;padding:2px 8px;border-radius:999px}
-    .duration{margin-left:auto}
-
-    .nowplaying{display:flex;align-items:center;gap:14px;min-width:0}
-    .np-cover{width:64px;height:64px;border-radius:10px;object-fit:cover;border:1px solid #263045}
-    .np-text{min-width:0}
-    .np-title{margin:0;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .np-sub{margin:2px 0 0;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .btn{border:1px solid #2a3550;background:#121828;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
-    .btn:hover{background:#1a2234}
-    .queue{display:flex;gap:8px;align-items:center;margin-left:auto}
-    .big-hero{position:sticky;top:0;margin-bottom:18px;border-radius:18px;overflow:hidden;border:1px solid #263045;background:#0d1220}
-    .big-hero img{width:100%;max-height:48vh;object-fit:cover;display:block}
-
-    @media (max-width: 900px){
-      .app{grid-template-columns:1fr;grid-template-rows:80px 1fr 100px;grid-template-areas:"header" "main" "player"}
-      .sidebar{display:none}
-      .big-hero img{max-height:36vh}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yc Music</title>
+<style>
+:root {
+  --bg:#0f1115; --panel:#161a22; --muted:#8b94a7; --text:#e8ecf3; --accent:#4ade80; --accent2:#60a5fa; --radius:16px;
+}
+body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh}
+header{padding:12px 20px;background:var(--panel);display:flex;gap:12px;align-items:center}
+header input{flex:1;padding:10px 12px;border-radius:12px;border:none;background:#0f1320;color:var(--text)}
+header button{padding:10px 16px;border-radius:12px;border:none;background:var(--accent);color:#0b0d12;cursor:pointer;font-weight:700}
+main{flex:1;overflow:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.card{background:linear-gradient(180deg,#182030,#141a28);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:0.15s}
+.card:hover{transform:translateY(-3px)}
+.card img{width:100%;aspect-ratio:1/1;object-fit:cover}
+.meta{padding:10px}
+.title{font-weight:700;margin:0 0 4px}
+.sub{color:var(--muted);font-size:12px;display:flex;gap:6px;flex-wrap:wrap}
+.pill{font-size:11px;border:1px solid #2a3550;background:#121828;padding:2px 6px;border-radius:999px}
+footer{padding:12px 20px;background:var(--panel);display:flex;align-items:center;gap:14px;border-top:1px solid #1f2532}
+.np-cover{width:64px;height:64px;border-radius:10px;object-fit:cover;border:1px solid #263045}
+.np-text{flex:1;min-width:0}
+.np-title{margin:0;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-sub{margin:2px 0 0;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{border:none;background:#121828;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn:hover{background:#1a2234}
+.big-hero{margin-bottom:18px;border-radius:18px;overflow:hidden;border:1px solid #263045}
+.big-hero img{width:100%;max-height:40vh;object-fit:cover;display:block}
+</style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="logo"><span class="logo-dot"></span> Yc Music</div>
-      <div class="nav" style="margin-top:16px">
-        <a href="#">Keşfet</a>
-        <a href="#">Çalma Listelerim</a>
-        <a href="#">Favoriler</a>
-      </div>
-    </aside>
-
-    <header class="header">
-      <form class="search" id="searchForm">
-        <input id="query" placeholder="Şarkı, sanatçı veya albüm ara…" />
-        <button type="submit">Ara</button>
-      </form>
-    </header>
-
-    <main class="main">
-      <div class="big-hero" id="hero" style="display:none">
-        <img id="heroImg" alt="Kapak" />
-      </div>
-      <div class="grid" id="results"></div>
-    </main>
-
-    <footer class="player">
-      <div class="nowplaying">
-        <img class="np-cover" id="npCover" alt="">
-        <div class="np-text">
-          <h4 class="np-title" id="npTitle">Hazır</h4>
-          <div class="np-sub" id="npSub">Bir şarkı seç</div>
-        </div>
-      </div>
-      <div class="queue">
-        <button class="btn" id="prevBtn">⏮︎</button>
-        <button class="btn" id="playBtn">▶️</button>
-        <button class="btn" id="nextBtn">⏭︎</button>
-        <span class="pill" id="queueInfo">Kuyruk: 0</span>
-      </div>
-      <audio id="player" preload="none"></audio>
-    </footer>
+<header>
+  <input id="query" placeholder="Şarkı, sanatçı veya albüm ara…">
+  <button id="searchBtn">Ara</button>
+</header>
+<main>
+  <div class="big-hero" id="hero" style="display:none">
+    <img id="heroImg" alt="Kapak">
   </div>
+  <div id="results"></div>
+</main>
+<footer>
+  <img class="np-cover" id="npCover" alt="">
+  <div class="np-text">
+    <h4 class="np-title" id="npTitle">Hazır</h4>
+    <div class="np-sub" id="npSub">Bir şarkı seç</div>
+  </div>
+  <button class="btn" id="prevBtn">⏮︎</button>
+  <button class="btn" id="playBtn">▶️</button>
+  <button class="btn" id="nextBtn">⏭︎</button>
+  <span class="pill" id="queueInfo">Kuyruk: 0</span>
+  <audio id="player" preload="none"></audio>
+</footer>
 
-  <script>
-    const resultsEl = document.getElementById("results");
-    const form = document.getElementById("searchForm");
-    const qInput = document.getElementById("query");
-    const player = document.getElementById("player");
-    const playBtn = document.getElementById("playBtn");
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    const npTitle = document.getElementById("npTitle");
-    const npSub = document.getElementById("npSub");
-    const npCover = document.getElementById("npCover");
-    const queueInfo = document.getElementById("queueInfo");
-    const hero = document.getElementById("hero");
-    const heroImg = document.getElementById("heroImg");
+<script>
+const resultsEl = document.getElementById("results");
+const searchBtn = document.getElementById("searchBtn");
+const queryInput = document.getElementById("query");
+const player = document.getElementById("player");
+const playBtn = document.getElementById("playBtn");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const npTitle = document.getElementById("npTitle");
+const npSub = document.getElementById("npSub");
+const npCover = document.getElementById("npCover");
+const queueInfo = document.getElementById("queueInfo");
+const hero = document.getElementById("hero");
+const heroImg = document.getElementById("heroImg");
 
-    let searchResults = [];
-    let queue = [];
-    let historyStack = [];
-    let current = null;
+let searchResults = [];
+let queue = [];
+let historyStack = [];
+let current = null;
 
-    function updateQueueInfo(){
-      queueInfo.textContent = `Kuyruk: ${queue.length}`;
-    }
+function updateQueueInfo(){ queueInfo.textContent=`Kuyruk: ${queue.length}`; }
 
-    function setNowPlaying(item){
-      current = item;
-      npTitle.textContent = item.title || "Bilinmiyor";
-      npSub.textContent = [item.artists, item.album].filter(Boolean).join(" • ") || "";
-      npCover.src = item.cover || "";
-      heroImg.src = item.cover || "";
-      hero.style.display = item.cover ? "block" : "none";
-      player.src = `/stream/${item.videoId}`;
-      player.play().catch(()=>{});
-      playBtn.textContent = "⏸︎";
-    }
+function setNowPlaying(item){
+  current=item;
+  npTitle.textContent=item.title||"Bilinmiyor";
+  npSub.textContent=[item.artists,item.album].filter(Boolean).join(" • ")||"";
+  npCover.src=item.cover||"";
+  heroImg.src=item.cover||"";
+  hero.style.display=item.cover?"block":"none";
+  player.src=`/stream/${item.videoId}`;
+  player.play().catch(()=>{});
+  playBtn.textContent="⏸︎";
+}
 
-    function pushToFront(item){
-      // Aynı videoId varsa kuyruğun içinden çıkar
-      queue = queue.filter(x => x.videoId !== item.videoId);
-      // en öne ekle
-      queue.unshift(item);
-      updateQueueInfo();
-    }
+function pushToFront(item){
+  queue = queue.filter(x=>x.videoId!==item.videoId);
+  queue.unshift(item);
+  updateQueueInfo();
+}
 
-    function renderResults(){
-      resultsEl.innerHTML = "";
-      for(const r of searchResults){
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <img class="cover" src="${r.cover || ""}" alt="">
-          <div class="meta">
-            <div class="title">${escapeHtml(r.title || "")}</div>
-            <div class="sub">
-              <span>${escapeHtml(r.artists || "Bilinmiyor")}</span>
-              ${r.album ? `<span class="pill">${escapeHtml(r.album)}</span>` : ""}
-              ${r.duration ? `<span class="duration pill">${escapeHtml(r.duration)}</span>` : ""}
-              ${r.explicit ? `<span class="pill">E</span>` : ""}
-            </div>
-          </div>
-        `;
-        card.addEventListener("click", () => {
-          pushToFront(r);            // tıklanan şarkıya öncelik
-          playNext(true);            // hemen çal
-        });
-        resultsEl.appendChild(card);
-      }
-    }
+function renderResults(){
+  resultsEl.innerHTML="";
+  for(const r of searchResults){
+    const card=document.createElement("div");
+    card.className="card";
+    card.innerHTML=`<img src="${r.cover||''}" alt=""><div class="meta"><div class="title">${r.title||''}</div><div class="sub"><span>${r.artists||''}</span>${r.album?`<span class="pill">${r.album}</span>`:""}${r.duration?`<span class="pill">${r.duration}</span>`:""}${r.explicit?`<span class="pill">E</span>`:""}</div></div>`;
+    card.addEventListener("click",()=>{ pushToFront(r); playNext(true); });
+    resultsEl.appendChild(card);
+  }
+}
 
-    function playNext(forceFromFront=false){
-      if(forceFromFront && queue.length){
-        const next = queue.shift();
-        if(current) historyStack.push(current);
-        setNowPlaying(next);
-        updateQueueInfo();
-        return;
-      }
-      if(queue.length){
-        const next = queue.shift();
-        if(current) historyStack.push(current);
-        setNowPlaying(next);
-        updateQueueInfo();
-      }
-    }
+function playNext(force=false){
+  if(force && queue.length){ setNowPlaying(queue.shift()); return; }
+  if(queue.length){ setNowPlaying(queue.shift()); }
+}
+function playPrev(){ const prev=historyStack.pop(); if(prev){ if(current) queue.unshift(current); setNowPlaying(prev); updateQueueInfo(); } }
 
-    function playPrev(){
-      const prev = historyStack.pop();
-      if(prev){
-        if(current) queue.unshift(current);
-        setNowPlaying(prev);
-        updateQueueInfo();
-      }
-    }
+searchBtn.addEventListener("click", async ()=>{
+  const q=queryInput.value.trim();
+  if(!q) return;
+  resultsEl.innerHTML="Aranıyor…";
+  try{
+    const res=await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+    const data=await res.json();
+    searchResults=data.results||[];
+    queue=[...searchResults];
+    historyStack=[]; current=null;
+    updateQueueInfo();
+    renderResults();
+  }catch(err){ resultsEl.innerHTML="Hata oluştu."; console.error(err); }
+});
 
-    form.addEventListener("submit", async (e)=>{
-      e.preventDefault();
-      const q = qInput.value.trim();
-      if(!q) return;
-      resultsEl.innerHTML = "Aranıyor…";
-      try{
-        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-        const data = await res.json();
-        searchResults = data.results || [];
-        // yeni arama: kuyruk arama sonuçlarıyla dolar (tıklananlar yine öne alınacak)
-        queue = [...searchResults];
-        historyStack = [];
-        current = null;
-        updateQueueInfo();
-        renderResults();
-      }catch(err){
-        resultsEl.innerHTML = "Hata oluştu.";
-        console.error(err);
-      }
-    });
+playBtn.addEventListener("click",()=>{
+  if(!current){ playNext(true); return; }
+  if(player.paused){ player.play(); playBtn.textContent="⏸︎"; }
+  else{ player.pause(); playBtn.textContent="▶️"; }
+});
 
-    playBtn.addEventListener("click", ()=>{
-      if(!current){
-        // hiç çalmıyorsa kuyruktan başla
-        playNext(true);
-        return;
-      }
-      if(player.paused){
-        player.play().catch(()=>{});
-        playBtn.textContent = "⏸︎";
-      }else{
-        player.pause();
-        playBtn.textContent = "▶️";
-      }
-    });
-
-    nextBtn.addEventListener("click", ()=> playNext(true));
-    prevBtn.addEventListener("click", ()=> playPrev());
-
-    player.addEventListener("ended", ()=> playNext(false));
-
-    function escapeHtml(s){
-      return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-    }
-  </script>
+nextBtn.addEventListener("click",()=>playNext(true));
+prevBtn.addEventListener("click",()=>playPrev());
+player.addEventListener("ended",()=>playNext(false));
+</script>
 </body>
 </html>
