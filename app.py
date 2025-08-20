@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, Response
 from ytmusicapi import YTMusic
 from cachetools import TTLCache
 import yt_dlp
+import requests
 
 app = Flask(__name__, template_folder="templates")
 ytm = YTMusic()
@@ -48,23 +49,23 @@ def api_search():
         })
     return {"results": results}
 
-@app.route("/stream/<video_id>")
-def stream(video_id):
+@app.route("/proxy/<video_id>")
+def proxy(video_id):
     try:
         if video_id in stream_cache:
-            return redirect(stream_cache[video_id])
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'quiet': True,
-            'no_warnings': True,
-            'simulate': True,
-            'forceurl': True
-        }
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
-            url = info['url']
-            stream_cache[video_id] = url
-            return redirect(url)
+            url = stream_cache[video_id]
+        else:
+            ydl_opts = {'format':'bestaudio/best','quiet':True,'simulate':True,'forceurl':True}
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
+                url = info['url']
+                stream_cache[video_id] = url
+        def generate():
+            with requests.get(url, stream=True) as r:
+                for chunk in r.iter_content(32*1024):
+                    if chunk:
+                        yield chunk
+        return Response(generate(), mimetype="audio/mpeg")
     except Exception as e:
         return f"Error: {str(e)}", 500
 
