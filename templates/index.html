@@ -1,12 +1,73 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <title>Render Test</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Render Flask Test</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .card {
+      background: #2e2e3e;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      padding: 30px;
+      text-align: center;
+      width: 90%;
+      max-width: 500px;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .card h1 {
+      margin: 0 0 15px;
+      font-size: 2rem;
+      color: #4ade80; /* yeşil */
+    }
+
+    .card p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      color: #ddd;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 20px;
+      margin: 10px 5px;
+      border-radius: 8px;
+      background: #4ade80;
+      color: #000;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #22c55e;
+      transform: translateY(-3px);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-    <h1>Render Flask Test Çalışıyor ✅</h1>
-    <p>Bu sayfa <strong>Flask</strong> üzerinden Render'da çalışacak.</p>
-    <a href="/merhaba">Merhaba Sayfası</a>
+  <div class="card">
+    <h1>✅ Render Test Başarılı</h1>
+    <p>Bu sayfa Flask üzerinden Render'da yayınlanıyor.</p>
+    <a href="/merhaba" class="btn">Merhaba Sayfası</a>
+    <a href="https://render.com/" target="_blank" class="btn">Render.com</a>
+  </div>
 </body>
 </html>
