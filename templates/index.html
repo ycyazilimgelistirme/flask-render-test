@@ -20,15 +20,18 @@ audio{width:100%;margin-top:20px;}
 <audio id="player" controls></audio>
 
 <script>
-const playBtn=document.getElementById("playBtn");
-const videoIdInput=document.getElementById("videoId");
-const player=document.getElementById("player");
+const playBtn = document.getElementById("playBtn");
+const videoIdInput = document.getElementById("videoId");
+const player = document.getElementById("player");
 
-playBtn.addEventListener("click",()=>{
-    const id=videoIdInput.value.trim();
+playBtn.addEventListener("click", () => {
+    const id = videoIdInput.value.trim();
     if(!id) return;
-    player.src=`/proxy/${id}`;
-    player.play().catch(e=>console.error(e));
+
+    player.pause();
+    player.src = `/proxy/${id}`;
+    player.load();
+    player.play().catch(err => console.error("Çalma hatası:", err));
 });
 </script>
 </body>
