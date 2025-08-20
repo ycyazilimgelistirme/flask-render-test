@@ -3,137 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yc Music Proxy</title>
+<title>Yc Music DRM Free</title>
 <style>
-:root {--bg:#0f1115;--panel:#161a22;--muted:#8b94a7;--text:#e8ecf3;--accent:#4ade80;--accent2:#60a5fa;--radius:16px}
-body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh}
-header{padding:12px 20px;background:var(--panel);display:flex;gap:12px;align-items:center}
-header input{flex:1;padding:10px 12px;border-radius:12px;border:none;background:#0f1320;color:var(--text)}
-header button{padding:10px 16px;border-radius:12px;border:none;background:var(--accent);color:#0b0d12;cursor:pointer;font-weight:700}
-main{flex:1;overflow:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
-.card{background:linear-gradient(180deg,#182030,#141a28);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:0.15s}
-.card:hover{transform:translateY(-3px)}
-.card img{width:100%;aspect-ratio:1/1;object-fit:cover}
-.meta{padding:10px}
-.title{font-weight:700;margin:0 0 4px}
-.sub{color:var(--muted);font-size:12px;display:flex;gap:6px;flex-wrap:wrap}
-.pill{font-size:11px;border:1px solid #2a3550;background:#121828;padding:2px 6px;border-radius:999px}
-footer{padding:12px 20px;background:var(--panel);display:flex;align-items:center;gap:14px;border-top:1px solid #1f2532}
-.np-cover{width:64px;height:64px;border-radius:10px;object-fit:cover;border:1px solid #263045}
-.np-text{flex:1;min-width:0}
-.np-title{margin:0;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.np-sub{margin:2px 0 0;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.btn{border:none;background:#121828;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
-.btn:hover{background:#1a2234}
-.big-hero{margin-bottom:18px;border-radius:18px;overflow:hidden;border:1px solid #263045}
-.big-hero img{width:100%;max-height:40vh;object-fit:cover;display:block}
+body{margin:0;font-family:system-ui;background:#0f1115;color:#e8ecf3;display:flex;flex-direction:column;height:100vh;padding:20px;}
+header{display:flex;gap:10px;margin-bottom:20px;}
+input{flex:1;padding:10px;border-radius:10px;border:none;background:#161a22;color:#e8ecf3;}
+button{padding:10px;border-radius:10px;border:none;background:#4ade80;color:#0b0d12;cursor:pointer;}
+audio{width:100%;margin-top:20px;}
 </style>
 </head>
 <body>
 <header>
-  <input id="query" placeholder="Şarkı, sanatçı veya albüm ara…">
-  <button id="searchBtn">Ara</button>
+<input id="videoId" placeholder="Video ID gir (örn: ZYlr1gd1LnE)">
+<button id="playBtn">Çal</button>
 </header>
-<main>
-  <div class="big-hero" id="hero" style="display:none">
-    <img id="heroImg" alt="Kapak">
-  </div>
-  <div id="results"></div>
-</main>
-<footer>
-  <img class="np-cover" id="npCover" alt="">
-  <div class="np-text">
-    <h4 class="np-title" id="npTitle">Hazır</h4>
-    <div class="np-sub" id="npSub">Bir şarkı seç</div>
-  </div>
-  <button class="btn" id="prevBtn">⏮︎</button>
-  <button class="btn" id="playBtn">▶️</button>
-  <button class="btn" id="nextBtn">⏭︎</button>
-  <span class="pill" id="queueInfo">Kuyruk: 0</span>
-  <audio id="player" preload="none"></audio>
-</footer>
+<audio id="player" controls></audio>
 
 <script>
-const resultsEl = document.getElementById("results");
-const searchBtn = document.getElementById("searchBtn");
-const queryInput = document.getElementById("query");
-const player = document.getElementById("player");
-const playBtn = document.getElementById("playBtn");
-const prevBtn = document.getElementById("prevBtn");
-const nextBtn = document.getElementById("nextBtn");
-const npTitle = document.getElementById("npTitle");
-const npSub = document.getElementById("npSub");
-const npCover = document.getElementById("npCover");
-const queueInfo = document.getElementById("queueInfo");
-const hero = document.getElementById("hero");
-const heroImg = document.getElementById("heroImg");
-
-let searchResults = [];
-let queue = [];
-let historyStack = [];
-let current = null;
-
-function updateQueueInfo(){ queueInfo.textContent=`Kuyruk: ${queue.length}`; }
-
-function setNowPlaying(item){
-  current=item;
-  npTitle.textContent=item.title||"Bilinmiyor";
-  npSub.textContent=[item.artists,item.album].filter(Boolean).join(" • ")||"";
-  npCover.src=item.cover||"";
-  heroImg.src=item.cover||"";
-  hero.style.display=item.cover?"block":"none";
-  player.src = `/proxy/${item.videoId}`;
-  player.play().catch(e=>console.error(e));
-  playBtn.textContent="⏸︎";
-}
-
-function pushToFront(item){
-  queue = queue.filter(x=>x.videoId!==item.videoId);
-  queue.unshift(item);
-  updateQueueInfo();
-}
-
-function renderResults(){
-  resultsEl.innerHTML="";
-  for(const r of searchResults){
-    const card=document.createElement("div");
-    card.className="card";
-    card.innerHTML=`<img src="${r.cover||''}" alt=""><div class="meta"><div class="title">${r.title||''}</div><div class="sub"><span>${r.artists||''}</span>${r.album?`<span class="pill">${r.album}</span>`:""}${r.duration?`<span class="pill">${r.duration}</span>`:""}${r.explicit?`<span class="pill">E</span>`:""}</div></div>`;
-    card.addEventListener("click",()=>{ pushToFront(r); playNext(true); });
-    resultsEl.appendChild(card);
-  }
-}
-
-function playNext(force=false){
-  if(force && queue.length){ setNowPlaying(queue.shift()); return; }
-  if(queue.length){ setNowPlaying(queue.shift()); }
-}
-function playPrev(){ const prev=historyStack.pop(); if(prev){ if(current) queue.unshift(current); setNowPlaying(prev); updateQueueInfo(); } }
-
-searchBtn.addEventListener("click", async ()=>{
-  const q=queryInput.value.trim();
-  if(!q) return;
-  resultsEl.innerHTML="Aranıyor…";
-  try{
-    const res=await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-    const data=await res.json();
-    searchResults=data.results||[];
-    queue=[...searchResults];
-    historyStack=[]; current=null;
-    updateQueueInfo();
-    renderResults();
-  }catch(err){ resultsEl.innerHTML="Hata oluştu."; console.error(err); }
-});
+const playBtn=document.getElementById("playBtn");
+const videoIdInput=document.getElementById("videoId");
+const player=document.getElementById("player");
 
 playBtn.addEventListener("click",()=>{
-  if(!current){ playNext(true); return; }
-  if(player.paused){ player.play(); playBtn.textContent="⏸︎"; }
-  else{ player.pause(); playBtn.textContent="▶️"; }
+    const id=videoIdInput.value.trim();
+    if(!id) return;
+    player.src=`/proxy/${id}`;
+    player.play().catch(e=>console.error(e));
 });
-
-nextBtn.addEventListener("click",()=>playNext(true));
-prevBtn.addEventListener("click",()=>playPrev());
-player.addEventListener("ended",()=>playNext(false));
 </script>
 </body>
 </html>
