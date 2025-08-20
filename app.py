@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, Response
 import yt_dlp
 import requests
 from cachetools import TTLCache
@@ -15,11 +15,12 @@ def home():
 @app.route("/proxy/<video_id>")
 def proxy(video_id):
     try:
+        # Cache varsa kullan
         if video_id in stream_cache:
             url = stream_cache[video_id]
         else:
             ydl_opts = {
-                'format': 'bestaudio/best',
+                'format': 'bestaudio[ext=m4a]/bestaudio',  # Tarayıcı destekli
                 'quiet': True,
                 'simulate': True,
                 'forceurl': True
@@ -29,8 +30,10 @@ def proxy(video_id):
                 url = info['url']
                 stream_cache[video_id] = url
 
+        # Stream olarak aktar
         def generate():
             with requests.get(url, stream=True) as r:
+                r.raise_for_status()
                 for chunk in r.iter_content(32*1024):
                     if chunk:
                         yield chunk
